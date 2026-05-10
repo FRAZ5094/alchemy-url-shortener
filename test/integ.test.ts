@@ -35,4 +35,4 @@ test(
     }),
 );
 
-afterAll.skipIf(!process.env.CI)(destroy(Stack));
+afterAll(destroy(Stack));
