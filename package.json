@@ -1,0 +1,21 @@
+{
+  "name": "alchemy-url-shortener",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@effect/platform-bun": ">=4.0.0-beta.60 || >=4.0.0",
+    "@effect/platform-node": ">=4.0.0-beta.60 || >=4.0.0",
+    "alchemy": "2.0.0-beta.35",
+    "effect": ">=4.0.0-beta.60 || >=4.0.0"
+  }
+}
