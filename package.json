@@ -4,12 +4,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run src/index.ts"
+    "dev": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "effect:check": "effect-language-service check",
+    "effect:diagnostics": "effect-language-service diagnostics --project tsconfig.json",
+    "prepare": "effect-language-service patch"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
+    "@effect/language-service": "^0.85.1",
+    "@types/bun": "latest",
     "typescript": "^5"
   },
   "dependencies": {

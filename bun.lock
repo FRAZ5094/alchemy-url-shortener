@@ -11,9 +11,8 @@
         "effect": ">=4.0.0-beta.60 || >=4.0.0",
       },
       "devDependencies": {
+        "@effect/language-service": "^0.85.1",
         "@types/bun": "latest",
-      },
-      "peerDependencies": {
         "typescript": "^5",
       },
     },
@@ -130,6 +129,8 @@
     "@distilled.cloud/core": ["@distilled.cloud/core@0.19.0", "", { "peerDependencies": { "effect": ">=4.0.0-beta.60 || >=4.0.0" } }, "sha512-4fwIhY4qIGEHJrjBvCzHYCxNQztpql0K0NskccrlXYg9nOl8UFT8632Uja09Qbo94vKTT00oiM0SF8XbDUXeFQ=="],
 
     "@distilled.cloud/neon": ["@distilled.cloud/neon@0.19.0", "", { "dependencies": { "@distilled.cloud/core": "0.19.0" }, "peerDependencies": { "effect": ">=4.0.0-beta.60 || >=4.0.0" } }, "sha512-NLqmtS2KkL1EZBtli1GCbkZi13NZBJuVdyAmY0xgHHQF2vcJsGCNzkgz7cFKA1y91uE/ozW7q5kROdX3tBeg2g=="],
+
+    "@effect/language-service": ["@effect/language-service@0.85.1", "", { "bin": { "effect-language-service": "cli.js" } }, "sha512-EXnJjIy6zQ3nUO/MZ+ynWUb8B895KZPotd1++oTs9JjDkplwM7cb6zo8Zq2zU6piwq+KflO7amXbEfj1UMpHkw=="],
 
     "@effect/platform-bun": ["@effect/platform-bun@4.0.0-beta.65", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.0-beta.65" }, "peerDependencies": { "effect": "^4.0.0-beta.65" } }, "sha512-6BgEjVDibeOgGj0pvYRx+mBLSWVBPlvuqa6o4kuyrRIdgn92nbKrbglEiIRe4sn7yYmeKei4N/kd7fRzN3rEwA=="],
 
