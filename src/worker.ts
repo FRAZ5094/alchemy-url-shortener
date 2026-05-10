@@ -2,8 +2,9 @@ import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
 import { HttpServerResponse } from "effect/unstable/http";
-import { urlKey, UrlNotFoundError, UrlStorage, UrlStorageLive } from "./url-storage";
+import { urlKeySchema, UrlNotFoundError, UrlStorage, UrlStorageLive } from "./url-storage";
 import { Match, Schema } from "effect";
+import { Kv } from "./Kv";
 
 const mapErrorToTag =
     <const Tag extends string, const Details extends Record<string, unknown> = {}>(
@@ -19,7 +20,7 @@ const mapErrorToTag =
                 })),
             );
 
-const reportError = Effect.tapError((error) => Effect.logError(error));
+export const reportError = Effect.tapError((error) => Effect.logError(error));
 
 const handlePost = Effect.gen(function* () {
     const urlStorage = yield* UrlStorage;
@@ -50,7 +51,7 @@ const handleGet = Effect.gen(function* () {
         mapErrorToTag("NoKeyGiven", { url: request.url }),
     );
 
-    const validatedKey = yield* Schema.decodeEffect(urlKey)(key).pipe(
+    const validatedKey = yield* Schema.decodeEffect(urlKeySchema)(key).pipe(
         mapErrorToTag("InvalidUrlKeyError", { key }),
     );
 
@@ -75,8 +76,8 @@ export const fetchHandler = Effect.gen(function* () {
     const handle404 = Effect.succeed(HttpServerResponse.text("Not found", { status: 404 }))
 
     return yield* Match.value(request.method).pipe(
-        Match.when("GET", () => handleGet),
         Match.when("POST", () => handlePost),
+        Match.when("GET", () => handleGet),
         Match.orElse(() => handle404),
     )
 
@@ -86,12 +87,18 @@ export default Cloudflare.Worker(
     "UrlShortenerWorker",
     { main: import.meta.path },
     Effect.gen(function* () {
+        const kv = yield* Cloudflare.KVNamespace.bind(Kv).pipe(
+            Effect.provide(Cloudflare.KVNamespaceBindingLive),
+        );
+
         return {
             fetch: fetchHandler.pipe(
                 Effect.catchCause((cause) =>
-                    Effect.succeed(HttpServerResponse.text("Internal Server Error", { status: 500 }))
+                    Effect.logError(cause).pipe(
+                        Effect.as(HttpServerResponse.text("Internal Server Error", { status: 500 })),
+                    )
                 ),
-                Effect.provide(UrlStorageLive),
+                Effect.provide(UrlStorageLive(kv)),
             ),
         };
     }),
