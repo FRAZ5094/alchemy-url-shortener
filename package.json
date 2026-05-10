@@ -5,6 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "bun run src/index.ts",
+    "deploy:dev": "alchemy deploy --stage dev_fraser",
+    "deploy:prod": "alchemy deploy --stage prod",
+    "destroy:dev": "alchemy destroy --stage dev_fraser --yes",
+    "destroy:test": "alchemy destroy --stage test --yes",
     "typecheck": "tsc --noEmit",
     "effect:check": "effect-language-service check",
     "effect:diagnostics": "effect-language-service diagnostics --project tsconfig.json",
