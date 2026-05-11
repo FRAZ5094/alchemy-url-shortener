@@ -20,7 +20,7 @@ test(
 
         const urlToBeShortened = "https://www.google.com";
 
-        const postRes = yield* Effect.promise(() => fetch(url!, { method: "POST", body: JSON.stringify({ url: urlToBeShortened }), headers: { "content-type": "application/json" } }))
+        const postRes = yield* Effect.promise(() => fetch(`${url}/api`, { method: "POST", body: JSON.stringify({ url: urlToBeShortened }), headers: { "content-type": "application/json" } }))
 
         const urlKey = yield* Effect.promise(async () => await postRes.text());
 

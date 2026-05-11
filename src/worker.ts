@@ -7,6 +7,10 @@ import { urlKeySchema, UrlNotFoundError, UrlStorage, UrlStorageLive } from "./ur
 import { Match, Schema } from "effect";
 import { Kv } from "./Kv";
 
+type WorkerConfig = {
+    assets?: Cloudflare.WorkerAssetsConfig;
+};
+
 const corsHeaders = {
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET, POST, OPTIONS",
@@ -96,16 +100,59 @@ export const fetchHandler = Effect.gen(function* () {
 
 }).pipe(Effect.map(withCors));
 
-export default Cloudflare.Worker(
+const hasShortUrlPath = (pathname: string) => {
+    const segments = pathname.split("/").filter(Boolean);
+    return segments.length === 1 && Schema.is(urlKeySchema)(segments[0]);
+};
+
+const serveAssets = Effect.gen(function* () {
+    const request = yield* HttpServerRequest;
+    const env = yield* Cloudflare.WorkerEnvironment;
+    const source = request.source;
+
+    if (!(source instanceof Request)) {
+        return yield* Effect.die("Cloudflare asset requests require a Web Request source");
+    }
+
+    const response = yield* Effect.promise(() =>
+        Promise.resolve(env.ASSETS.fetch(source)) as Promise<Response>
+    );
+
+    return HttpServerResponse.raw(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+    });
+});
+
+export const appFetchHandler = Effect.gen(function* () {
+    const request = yield* HttpServerRequest;
+    const url = new URL(request.url, "http://worker.local");
+    const isApiRequest = url.pathname === "/api" || url.pathname.startsWith("/api/");
+    const isShortUrlRequest = request.method === "GET" && hasShortUrlPath(url.pathname);
+
+    if (isApiRequest || isShortUrlRequest) {
+        return yield* fetchHandler;
+    }
+
+    return yield* serveAssets;
+});
+
+export const createWorker = (
+    config: WorkerConfig = {},
+) => Cloudflare.Worker(
     "UrlShortenerWorker",
-    { main: import.meta.path },
+    {
+        main: import.meta.path,
+        assets: config.assets,
+    } as any,
     Effect.gen(function* () {
         const kv = yield* Cloudflare.KVNamespace.bind(Kv).pipe(
             Effect.provide(Cloudflare.KVNamespaceBindingLive),
         );
 
         return {
-            fetch: fetchHandler.pipe(
+            fetch: appFetchHandler.pipe(
                 Effect.catchCause((cause) =>
                     Effect.logError(cause).pipe(
                         Effect.as(withCors(HttpServerResponse.text("Internal Server Error", { status: 500 }))),
@@ -116,3 +163,5 @@ export default Cloudflare.Worker(
         };
     }),
 );
+
+export default createWorker();

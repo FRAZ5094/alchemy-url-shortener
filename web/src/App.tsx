@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
-const apiUrl = import.meta.env.VITE_URL_SHORTENER_URL;
+const apiUrl = "/api";
 
 const shortenUrl = async (url: string) => {
   const response = await fetch(apiUrl, {
@@ -37,7 +37,7 @@ function App() {
       return undefined;
     }
 
-    return `${apiUrl}/${data}`;
+    return `${window.location.origin}/${data}`;
   }, [data]);
 
   const handleCopyUrl = async () => {
