@@ -3,8 +3,15 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
-    "dev": "bun run src/index.ts",
+    "dev": "bun run dev:all",
+    "dev:worker": "alchemy dev",
+    "dev:web": "bun run --filter web dev",
+    "dev:all": "bun run dev:worker & bun run dev:web & wait",
+    "build:web": "bun run --filter web build",
     "deploy:dev": "alchemy deploy --stage dev_fraser",
     "deploy:prod": "alchemy deploy --stage prod",
     "destroy:dev": "alchemy destroy --stage dev_fraser --yes",

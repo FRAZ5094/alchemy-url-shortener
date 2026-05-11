@@ -34,5 +34,6 @@
         "diagnosticSeverity": {}
       }
     ]
-  }
+  },
+  "exclude": ["web"]
 }
