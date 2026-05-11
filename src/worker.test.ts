@@ -43,7 +43,27 @@ describe("fetchHandler", () => {
 
         expect(storedUrls).toEqual(["https://example.com/article"]);
         expect(response.status).toBe(203);
+        expect(response.headers.get("access-control-allow-origin")).toBe("*");
         expect(await response.text()).toBe("test-key");
+    });
+
+    test("handles CORS preflight requests", async () => {
+        const response = await runFetchHandler(
+            new Request("https://short.example/", {
+                method: "OPTIONS",
+                headers: {
+                    origin: "http://localhost:5174",
+                    "access-control-request-method": "POST",
+                    "access-control-request-headers": "content-type",
+                },
+            }),
+            {},
+        );
+
+        expect(response.status).toBe(204);
+        expect(response.headers.get("access-control-allow-origin")).toBe("*");
+        expect(response.headers.get("access-control-allow-methods")).toContain("POST");
+        expect(response.headers.get("access-control-allow-headers")).toContain("Content-Type");
     });
 
     test("it returns a 404 when the url is not found", async () => {
